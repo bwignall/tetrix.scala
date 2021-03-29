@@ -18,20 +18,20 @@ object Main extends SimpleSwingApplication {
   val blockMargin = 1
   val mainPanelSize = new Dimension(700, 400)
 
-  val config = Config(minActionTime = 151,
-    maxThinkTime = 1500,
-    onDrop = Some(Tick))
+  val config =
+    Config(minActionTime = 151, maxThinkTime = 1500, onDrop = Some(Tick))
   val ui = new AbstractUI(config)
 
-  def onKeyPress(keyCode: Value) = keyCode match {
-    case Left  => ui.left()
-    case Right => ui.right()
-    case Up    => ui.up()
-    case Down  => ui.down()
-    case Space => ui.space()
-    case _ =>
-  }
-  def onPaint(g: Graphics2D) {
+  def onKeyPress(keyCode: Value) =
+    keyCode match {
+      case Left  => ui.left()
+      case Right => ui.right()
+      case Up    => ui.up()
+      case Down  => ui.down()
+      case Space => ui.space()
+      case _     =>
+    }
+  def onPaint(g: Graphics2D): Unit = {
     val (view1, view2) = ui.views
     val unit = blockSize + blockMargin
     val xOffset = mainPanelSize.width / 2
@@ -42,7 +42,7 @@ object Main extends SimpleSwingApplication {
     drawBoard(g, (12 * unit + xOffset, 0), view2.miniGridSize, view2.next, Nil)
     drawStatus(g, (12 * unit + xOffset, 0), view2)
   }
-  def drawStatus(g: Graphics2D, offset: (Int, Int), view: GameView) {
+  def drawStatus(g: Graphics2D, offset: (Int, Int), view: GameView): Unit = {
     val unit = blockSize + blockMargin
     g setColor bluishSilver
     view.status match {
@@ -54,56 +54,73 @@ object Main extends SimpleSwingApplication {
     }
     g drawString ("lines: " + view.lineCount.toString, offset._1, offset._2 + 7 * unit)
   }
-  def drawBoard(g: Graphics2D, offset: (Int, Int), gridSize: (Int, Int), 
-      blocks: Seq[Block], current: Seq[Block]) {
+  def drawBoard(
+      g: Graphics2D,
+      offset: (Int, Int),
+      gridSize: (Int, Int),
+      blocks: Seq[Block],
+      current: Seq[Block]
+  ): Unit = {
     def buildRect(pos: (Int, Int)): Rectangle =
-      new Rectangle(offset._1 + pos._1 * (blockSize + blockMargin),
+      new Rectangle(
+        offset._1 + pos._1 * (blockSize + blockMargin),
         offset._2 + (gridSize._2 - pos._2 - 1) * (blockSize + blockMargin),
-        blockSize, blockSize)
-    def drawEmptyGrid {
+        blockSize,
+        blockSize
+      )
+    def drawEmptyGrid: Unit = {
       g setColor bluishLigherGray
       for {
         x <- 0 to gridSize._1 - 1
         y <- 0 to gridSize._2 - 1
-        val pos = (x, y)
-      } g draw buildRect(pos)      
+        pos = (x, y)
+      } g draw buildRect(pos)
     }
-    def drawBlocks {
+    def drawBlocks: Unit = {
       g setColor bluishEvenLigher
-      blocks filter {_.pos._2 < gridSize._2} foreach { b =>
-        g fill buildRect(b.pos) }
+      blocks filter { _.pos._2 < gridSize._2 } foreach { b =>
+        g fill buildRect(b.pos)
+      }
     }
-    def drawCurrent {
+    def drawCurrent: Unit = {
       g setColor bluishSilver
-      current filter {_.pos._2 < gridSize._2} foreach { b =>
-        g fill buildRect(b.pos) }
+      current filter { _.pos._2 < gridSize._2 } foreach { b =>
+        g fill buildRect(b.pos)
+      }
     }
     drawEmptyGrid
     drawBlocks
-    drawCurrent  
+    drawCurrent
   }
 
-  def top = new MainFrame {
-    title = "tetrix"
-    contents = mainPanel
-  }
-  def mainPanel = new Panel {
-    preferredSize = mainPanelSize
-    focusable = true
-    listenTo(keys)
-    reactions += {
-      case KeyPressed(_, key, _, _) =>
-        onKeyPress(key)
-        repaint
+  def top =
+    new MainFrame {
+      title = "tetrix"
+      contents = mainPanel
     }
-    override def paint(g: Graphics2D) {
-      g setColor bluishGray
-      g fillRect (0, 0, size.width, size.height)
-      onPaint(g)
+  def mainPanel =
+    new Panel {
+      preferredSize = mainPanelSize
+      focusable = true
+      listenTo(keys)
+      reactions += {
+        case KeyPressed(_, key, _, _) =>
+          onKeyPress(key)
+          repaint()
+      }
+      override def paint(g: Graphics2D): Unit = {
+        g setColor bluishGray
+        g fillRect (0, 0, size.width, size.height)
+        onPaint(g)
+      }
+      val timer = new SwingTimer(
+        100,
+        new AbstractAction() {
+          def actionPerformed(e: java.awt.event.ActionEvent): Unit = {
+            repaint()
+          }
+        }
+      )
+      timer.start
     }
-    val timer = new SwingTimer(100, new AbstractAction() {
-      def actionPerformed(e: java.awt.event.ActionEvent) { repaint }
-    })
-    timer.start
-  }
 }
