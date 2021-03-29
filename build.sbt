@@ -7,7 +7,7 @@ lazy val buildSettings = Seq(
   licenses := Seq(
     "MIT License" -> url("http://opensource.org/licenses/mit-license.php/")
   ),
-  scalaVersion := "2.11.12", // "2.11.12", // "2.12.13", // "2.13.5", // "2.10.2", // "2.10.7"
+  scalaVersion := "2.13.4", // "2.11.12", // "2.12.13", // "2.13.5", // "2.10.2", // "2.10.7"
   scalacOptions := Seq("-deprecation", "-unchecked"),
   initialCommands in console := """import com.eed3si9n.tetrix._
                                   |import Stage._""".stripMargin,
@@ -18,7 +18,7 @@ lazy val buildSettings = Seq(
 )
 
 lazy val specs2version = "4.10.0"
-lazy val akkaVersion = "2.3.16"
+lazy val akkaVersion = "2.6.13"
 lazy val libDeps = Def.setting {
   Seq(
     "org.specs2" %% "specs2-core" % specs2version % "test",
